@@ -6,7 +6,7 @@ import cors from 'cors';
 const app = express();
 
 app.use(express.json());
-app.use(morgan(NODE_ENV === "prod" ? "combined" : "dev"));
+app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
 
 
 // Estos origenes estarán permitidos
