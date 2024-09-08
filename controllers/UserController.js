@@ -88,7 +88,7 @@ export default class UserController {
         try {
             // Check if the email and password are correct
             if (searchedUser && (
-                UserController.areGoodCredentials(searchedUser.password, password)
+                await UserController.areGoodCredentialsAsync(searchedUser.password, password)
             )) {
 
                 return res.status(200).send(
@@ -119,10 +119,10 @@ export default class UserController {
      *
      * @param searchedPassword - The input password from a user
      * @param {string} password - The user's password.
-     * @returns {boolean} True if credentials are valid, otherwise false.
+     * @returns {Promise<boolean>} True if credentials are valid, otherwise false.
      */
-    static areGoodCredentials(searchedPassword, password) {
-        return bcrypt.compare(password, searchedPassword);
+    static async areGoodCredentialsAsync(searchedPassword, password) {
+        return await bcrypt.compare(password, searchedPassword);
     }
 
     /**
