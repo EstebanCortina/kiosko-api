@@ -10,7 +10,7 @@
     "seed": "npx sequelize-cli db:seed:all --config ./config/config.cjs",
     "seed-undo-all": "npx sequelize-cli db:seed:undo:all --config ./config/config.cjs",
     "migrate-seed": "npm run migrate && npm run seed",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --require @babel/register",
     "dev": "nodemon index.js"
   },
   "keywords": [],
@@ -27,8 +27,12 @@
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
+    "@babel/register": "^7.24.6",
+    "babel": "^6.23.0",
+    "chai": "^5.1.1",
     "mocha": "^10.7.3",
     "nodemon": "^3.1.4",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "sinon": "^18.0.0"
   }
 }
