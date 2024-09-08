@@ -10,4 +10,12 @@ router.get('/', (req, res) => {
     });
 })
 
+import UserController from "../controllers/UserController.js";
+const userController = new UserController();
+router.post('/register', userController.registerAsync.bind(userController))
+router.post('/login', userController.loginAsync.bind(userController))
+
+import users_router from "./users_router.js";
+router.use('/users', users_router)
+
 export default router;
