@@ -1,13 +1,15 @@
-import {NODE_ENV, PORT} from './config/env.js'
+import {NODE_ENV, PORT, JWT_SECRET} from './config/env.js'
 import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import SJWT from "./config/sjwt.js";
 
 const app = express();
 
 app.use(express.json());
 app.use(morgan(NODE_ENV === "production" ? "combined" : "dev"));
 
+new SJWT();
 
 // Estos origenes estarán permitidos
 const allowedOrigins = {
