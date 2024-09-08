@@ -10,6 +10,6 @@ export default (error)=>{
         return {msg: 'ValidationError'};
     }
 
-    console.error('Database error:', error);
-    throw new Error('Database error');
+    console.error('Server error:', error);
+    return {msg: 'Server error'};
 }
