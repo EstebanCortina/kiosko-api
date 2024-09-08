@@ -1,3 +1,5 @@
+import { JWT_EXPIRATION_DATE } from "../config/env.js";
+
 import bcrypt from "bcrypt";
 import encryptPassword from "../helpers/encryptPassword.js";
 
@@ -6,6 +8,7 @@ import { UniqueConstraintError } from "sequelize";
 
 import { successResponse, errorResponse } from "../helpers/response.js";
 import controllerModel from '../models/user.js';
+import SJWT from "../config/sjwt.js";
 
 /**
  * Controller for managing user-related operations.
@@ -54,7 +57,7 @@ export default class UserController {
             );
 
         } catch (error) {
-            console.error('[UserController Error]:', sequelizeErrorHandler(error));
+            console.error('[UserController]:', sequelizeErrorHandler(error));
 
             if (error instanceof UniqueConstraintError) {
                 return res.status(400).send(
@@ -77,19 +80,36 @@ export default class UserController {
     async loginAsync(req, res) {
         const { email, password } = req.body;
 
+        // Find the requested user
+        const searchedUser = (
+            await controllerModel.findOne({ where: { email } })
+        );
+
         try {
-            if (await UserController.areGoodCredentialsAsync(email, password)) {
+            // Check if the email and password are correct
+            if (searchedUser && (
+                UserController.areGoodCredentials(searchedUser.password, password)
+            )) {
+
                 return res.status(200).send(
-                    // Should return a JWT in the 'data' field of the response
-                    successResponse("Success login")
+                    successResponse("Success login", {
+                        jwt: await UserController.createSjwtAsync({
+                            user_id: searchedUser.id,
+                            user_email: searchedUser.email,
+                            user_name: searchedUser.username,
+                        })
+                    })
+
                 );
+
             }
+
             return res.status(404).send(
                 errorResponse('Wrong email or password')
             );
 
         } catch (error) {
-            console.error('[UserController Error]:', sequelizeErrorHandler(error));
+            console.error('[UserController]:', sequelizeErrorHandler(error));
             return res.status(500).send(errorResponse());
         }
     }
@@ -97,15 +117,21 @@ export default class UserController {
     /**
      * Checks if the provided credentials are valid.
      *
-     * @param {string} email - The user's email.
+     * @param searchedPassword - The input password from a user
      * @param {string} password - The user's password.
-     * @returns {Promise<boolean>} True if credentials are valid, otherwise false.
+     * @returns {boolean} True if credentials are valid, otherwise false.
      */
-    static async areGoodCredentialsAsync(email, password) {
-        const searchedUser = (
-            await controllerModel.findOne({ where: { email } })
-        );
-        if (!searchedUser) return false;
-        return await bcrypt.compare(password, searchedUser.password);
+    static areGoodCredentials(searchedPassword, password) {
+        return bcrypt.compare(password, searchedPassword);
+    }
+
+    /**
+     * Generates a signed JSON Web Token (JWT) with the provided payload encrypted.
+     *
+     * @param {object} payload - The data to be included in the JWT payload.
+     * @returns {Promise<string>} A promise that resolves to the generated JWT.
+     */
+    static async createSjwtAsync(payload) {
+        return await SJWT.getJWT(payload, JWT_EXPIRATION_DATE)
     }
 }
