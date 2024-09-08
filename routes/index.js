@@ -16,6 +16,12 @@ router.post('/register', userController.registerAsync.bind(userController))
 router.post('/login', userController.loginAsync.bind(userController))
 
 import users_router from "./users_router.js";
+import authSJWT from "../middlewares/authSJWT.js";
 router.use('/users', users_router)
+
+// Test endpoint
+router.get('/protected', authSJWT, (req, res)=>{
+    res.status(200).send('authenticated')
+})
 
 export default router;
