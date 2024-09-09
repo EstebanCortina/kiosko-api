@@ -13,14 +13,15 @@ router.get('/', (req, res) => {
 
 import UserController from "../controllers/UserController.js";
 const userController = new UserController();
-router.post('/register', userController.registerAsync.bind(userController))
-router.post('/login', userController.loginAsync.bind(userController))
+router.post('/register', registerValidation, userController.registerAsync.bind(userController))
+router.post('/login', loginValidation,userController.loginAsync.bind(userController))
 
 import users_router from "./users_router.js";
 router.use('/users', users_router)
 
 import feedsRouter from "./feedsRouter.js";
 import FeedController from "../controllers/FeedController.js";
+import {loginValidation, registerValidation} from "../middlewares/validators/userValidator.js";
 router.use('/feeds', feedsRouter);
 
 const feedController = new FeedController();
