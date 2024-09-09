@@ -1,9 +1,11 @@
+import { API_NEWSPAPER } from "../config/env.js";
 import controllerModel from '../models/feed.js';
 import topicModel from '../models/topic.js';
 import { Op } from 'sequelize';
 import { errorResponse, successResponse } from "../helpers/response.js";
 import User from "../models/user.js";
 import sequelizeErrorHandler from "../handlers/sequelizeErrorHandler.js";
+import axios from "axios";
 
 /**
  * Controller for managing feed-related operations.
@@ -219,6 +221,62 @@ export default class FeedController {
         }
     }
 
+
+    /**
+     * Fetches a feed by its ID along with related resources from Chronicling America API.
+     *
+     * @param {object} req - The request object, including the feed ID in `req.params.id`.
+     * @param {object} res - The response object.
+     * @returns {Promise<void>} A success response with the feed and related resources.
+     */
+    async showMyFeedAsync(req, res) {
+        try {
+
+            const feed = await controllerModel.findOne({
+                where: {
+                    id: req.params.id,
+                    user_id: req.userId
+                }
+            });
+
+            if (!feed) {
+                return res.status(404).send(
+                    errorResponse('Feed not found')
+                );
+            }
+            const { page= 1 } = req.query
+            const resources = (
+                await this.fetchResourcesForFeedAsync(feed.topics, page)
+            );
+
+            const result = {
+                feed: {
+                    id: feed.id,
+                    name: feed.name,
+                    topics: feed.topics,
+                    is_favorite: feed.is_favorite,
+                    is_public: feed.is_public,
+                    user_id: feed.user_id,
+                    created_at: feed.created_at,
+                    updated_at: feed.updated_at
+                },
+                resources
+            };
+
+            return res.status(200).send(
+                successResponse('Feed with resources', result)
+            );
+
+        } catch (error) {
+            console.error('[FeedController]:', error);
+            return res.status(500).send(
+                errorResponse('Server error')
+            );
+        }
+    }
+
+
+
     /**
      * Secures a list of topics by ensuring they exist in the database or creating them if not.
      *
@@ -278,4 +336,41 @@ export default class FeedController {
 
         return !existingFavoriteFeed;
     }
+
+
+    /**
+     * Fetches resources from Chronicling America API based on topics.
+     *
+     * @param {object[]} topics - The list of topics to search for.
+     * @param page
+     * @returns {Promise<object[]>} A promise that resolves to a list of formatted resources related to the topics.
+     */
+    async fetchResourcesForFeedAsync(topics, page = 1) {
+        try {
+
+            // Create the multiple topic query string and make the request
+            const topicNames = topics.map(topic => topic.name).join(' OR ');
+
+            const response = (
+                await axios.get(`${API_NEWSPAPER}=${encodeURIComponent(topicNames)}&format=json&page=${page}`)
+            );
+
+            if (response.data && response.data.items) {
+                return response.data.items.map(item => ({
+                    title: item.title,
+                    date: item.date,
+                    type: item.type,
+                    edition_label: item.edition_label,
+                    languages: item.language
+                }));
+            }
+            return []
+
+        } catch (error) {
+            console.error('[FeedController]: Error fetching resources from Chronicling America API', error);
+            return [];
+        }
+    }
+
+
 }

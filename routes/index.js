@@ -20,8 +20,11 @@ import users_router from "./users_router.js";
 router.use('/users', users_router)
 
 import feedsRouter from "./feedsRouter.js";
+import FeedController from "../controllers/FeedController.js";
 router.use('/feeds', feedsRouter);
 
+const feedController = new FeedController();
+router.get('/my-feed/:id', authSJWT, feedController.showMyFeedAsync.bind(feedController));
 // Test endpoint
 router.get('/protected', authSJWT, (req, res)=>{
     res.status(200).send('authenticated')
