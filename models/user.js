@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import sequelize from "../config/sequelize.js";
+import Feed from "./feed.js";
 
 const User = sequelize.define('User', {
     id: {
@@ -32,4 +33,10 @@ const User = sequelize.define('User', {
     timestamps: true,
     underscored: true
 });
+
+import('./feed.js').then((module) => {
+    const Feed = module.default;
+    User.hasMany(Feed, { foreignKey: 'user_id', as: 'feeds' });
+});
+
 export default User;

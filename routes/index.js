@@ -1,4 +1,5 @@
 import express from 'express';
+import authSJWT from "../middlewares/authSJWT.js";
 const router = express.Router();
 
 
@@ -16,8 +17,10 @@ router.post('/register', userController.registerAsync.bind(userController))
 router.post('/login', userController.loginAsync.bind(userController))
 
 import users_router from "./users_router.js";
-import authSJWT from "../middlewares/authSJWT.js";
 router.use('/users', users_router)
+
+import feedsRouter from "./feedsRouter.js";
+router.use('/feeds', feedsRouter);
 
 // Test endpoint
 router.get('/protected', authSJWT, (req, res)=>{
