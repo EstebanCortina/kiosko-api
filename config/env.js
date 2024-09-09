@@ -13,3 +13,5 @@ export const DB_PASSWORD = process.env.DB_PASSWORD
 
 export const JWT_EXPIRATION_DATE = process.env.JWT_EXPIRATION_DATE?? '2h'
 export const JWT_SECRET = process.env.JWT_SECRET?? 'k10sk0ch4ll3ng3'
+
+export const API_NEWSPAPER = process.env.API_NEWSPAPER
