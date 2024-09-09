@@ -151,7 +151,7 @@ export default class FeedController {
      * @returns {object} The query object to be used with Sequelize.
      */
     createClause(params, where) {
-        const { topic, page = 1, username } = params;
+        const { topic, page = 1, name } = params;
         const limit = 10;
         const offset = (page - 1) * limit;
 
@@ -169,9 +169,9 @@ export default class FeedController {
             delete feedQuery.where.topics;
         }
 
-        if (username) {
+        if (name) {
             feedQuery.where['$user.username$'] = {
-                [Op.iLike]: username
+                [Op.iLike]: name
             };
             feedQuery.include = {
                 model: User,

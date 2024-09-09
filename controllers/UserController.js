@@ -33,11 +33,11 @@ export default class UserController {
                 email: email,
                 password: await encryptPassword(password),
             })
-        );
+        )?.dataValues;
         delete newUser.id;
         delete newUser.password;
-        delete newUser.created_at;
-        delete newUser.updated_at;
+        delete newUser.createdAt;
+        delete newUser.updatedAt;
         return newUser;
     }
 
