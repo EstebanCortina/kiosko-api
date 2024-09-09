@@ -17,11 +17,13 @@ export const successResponse = (message='Success', data=null)=> {
  * Creates a standardized error response object.
  *
  * @param {string} [message='Server error'] - A message to include in the response. Defaults to 'Server error'.
+ * @param data
  * @returns {object} The response object containing the status and message.
  */
-export const errorResponse = (message='Server error')=> {
+export const errorResponse = (message='Server error', data= null)=> {
     return {
         "status": "NOT OK",
         "message": message,
+        "data": data
     }
 }
