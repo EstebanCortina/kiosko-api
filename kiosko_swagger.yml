@@ -1,0 +1,384 @@
+openapi: 3.0.0
+info:
+  title: Kiosko Backend challenge
+  description: API for user registration, login, and feeds management.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+paths:
+  # User services
+  /login:
+    post:
+      tags:
+        - Users
+      summary: User login
+      description: Authenticates a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        "200":
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "401":
+          description: Invalid credentials
+
+  /register:
+    post:
+      tags:
+        - Users
+      summary: User registration
+      description: Registers a new user and returns the user information.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "new_user"
+                email:
+                  type: string
+                  format: email
+                  example: "newuser@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        "201":
+          description: Successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: "new_user"
+                  email:
+                    type: string
+                    example: "newuser@example.com"
+        "400":
+          description: Invalid input or user already exists
+
+  # Feed services
+  /feeds:
+    get:
+      tags:
+        - Feeds
+      summary: Get feeds
+      description: Retrieves a list of feeds based on topics and other filters.
+      parameters:
+        - name: topic
+          in: query
+          description: Filter feeds by topic
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: A list of feeds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "Tech News Feed"
+                    topics:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: "Technology"
+                    is_favorite:
+                      type: boolean
+                      example: true
+                    is_public:
+                      type: boolean
+                      example: false
+        "404":
+          description: No feeds found
+
+    post:
+      tags:
+        - Feeds
+      summary: Create a new feed
+      description: Creates a new feed for the user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "My Tech Feed"
+                topics:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Technology"
+                is_favorite:
+                  type: boolean
+                  example: false
+                is_public:
+                  type: boolean
+                  example: true
+      responses:
+        "201":
+          description: Feed created successfully
+        "400":
+          description: Invalid data or feed already exists
+
+  /feeds/{id}:
+    put:
+      tags:
+        - Feeds
+      summary: Update a feed
+      description: Updates the details of an existing feed by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the feed to update
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Feed Name"
+                topics:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      name:
+                        type: string
+                        example: "Updated Topic"
+                is_favorite:
+                  type: boolean
+                  example: false
+                is_public:
+                  type: boolean
+                  example: true
+      responses:
+        "200":
+          description: Feed updated successfully
+        "404":
+          description: Feed not found
+        "400":
+          description: Invalid data
+
+    delete:
+      tags:
+        - Feeds
+      summary: Delete a feed
+      description: Deletes an existing feed by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the feed to delete
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "204":
+          description: Feed deleted successfully
+        "404":
+          description: Feed not found
+
+  /feeds/public:
+    get:
+      tags:
+        - Feeds
+      summary: Get public feeds
+      description: Retrieves a list of public feeds.
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: name
+          in: query
+          description: Name of the user
+          required: false
+          schema:
+            type: string
+            example: kiosko
+
+      responses:
+        "200":
+          description: A list of public feeds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "Public Tech Feed"
+                    topics:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: "Technology"
+                    is_public:
+                      type: boolean
+                      example: true
+        "404":
+          description: No public feeds found
+
+  /my-feed/{id}:
+    get:
+      tags:
+        - Feeds
+      summary: Get feed by ID for the current user
+      description: Retrieve a specific feed along with its topics and related resources.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the feed
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successfully retrieved feed with related resources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  feed:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 4
+                      name:
+                        type: string
+                        example: "Kiosko Feed"
+                      topics:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                              example: 16
+                            name:
+                              type: string
+                              example: "Colima"
+                      is_favorite:
+                        type: boolean
+                        example: false
+                      is_public:
+                        type: boolean
+                        example: true
+                      user_id:
+                        type: integer
+                        example: 13
+                  resources:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                          example: "San Antonio daily light. [volume]"
+                        date:
+                          type: string
+                          example: "19030813"
+                        type:
+                          type: string
+                          example: "page"
+                        edition_label:
+                          type: string
+                          example: "HOME EDITION"
+                        languages:
+                          type: array
+                          items:
+                            type: string
+                            example: "English"
+        404:
+          description: Feed not found
+        500:
+          description: Internal server error
