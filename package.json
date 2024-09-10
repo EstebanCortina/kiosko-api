@@ -11,7 +11,8 @@
     "seed-undo-all": "npx sequelize-cli db:seed:undo:all --config ./config/config.cjs",
     "migrate-seed": "npm run migrate && npm run seed",
     "test": "mocha --require @babel/register",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "prod": "node index.js"
   },
   "keywords": [],
   "author": "Esteban Cortina",

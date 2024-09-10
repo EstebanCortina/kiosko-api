@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: estebancortina/kiosko-feeds-db:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+
+  express-app:
+    image: estebancortina/kiosko-feeds-api:latest
+    container_name: kiosko-feeds-api
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      NODE_ENV: ${NODE_ENV}
+      PORT: ${PORT}
+      BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS}
+      KIOSKO_USERNAME: ${KIOSKO_USERNAME}
+      KIOSKO_EMAIL: ${KIOSKO_EMAIL}
+      KIOSKO_PASSWORD: ${KIOSKO_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_DATE: ${JWT_EXPIRATION_DATE}
+      API_NEWSPAPER: ${API_NEWSPAPER}
+    command: >
+      sh -c "
+        npm run migrate-seed
+        npm run prod
+      "
+    ports:
+      - "8080:${PORT}"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

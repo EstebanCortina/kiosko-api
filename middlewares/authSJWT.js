@@ -1,4 +1,4 @@
-import SJWT from "../config/SJWT.js";
+import SJWT from "../config/sjwt.js";
 import extractBearerToken from "../helpers/extractBearerToken.js";
 import { errorResponse } from "../helpers/response.js";
 
